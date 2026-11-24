@@ -11,7 +11,7 @@ Faculty: **Prof. Prithwijit Guha**
 | Abdul Quadir | 264152001 |
 | Sanjeev Singh | 264152013 |
 
-🌐 **[Project Report Webpage](https://akashshukla-github.github.io/SINet-COD-VideoAnalytics/)** &nbsp;·&nbsp;
+🌐 **[Project Report Webpage](https://akashshukla-github.github.io/SINet-COD-VideoAnalytics/?v=3)** &nbsp;·&nbsp;
 📊 **[Presentation (PPT)](assets/ppt/SINet_COD_Presentation.pptx)** &nbsp;·&nbsp;
 📓 **[All code, explained (notebook)](SINet_Complete_Code_Explained.ipynb)** &nbsp;·&nbsp;
 ▶️ **[Run in Colab](https://colab.research.google.com/github/akashshukla-github/SINet-COD-VideoAnalytics/blob/main/SINet_Colab_Demo.ipynb)**
