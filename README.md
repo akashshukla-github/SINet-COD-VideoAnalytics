@@ -5,11 +5,7 @@
 **EE5340 Video Analytics — Course Project 2026 · IIT Guwahati (SiSAS)**
 Faculty: **Prof. Prithwijit Guha**
 
-| Member | Roll No. |
-|:--|:--|
-| Akash Shukla | 264152017 |
-| Abdul Quadir | 264152001 |
-| Sanjeev Singh | 264152013 |
+**Team:** Akash Shukla · Abdul Quadir · Sanjeev Singh
 
 🌐 **[Project Report Webpage](https://akashshukla-github.github.io/SINet-COD-VideoAnalytics/?v=3)** &nbsp;·&nbsp;
 📊 **[Presentation (PPT)](assets/ppt/SINet_COD_Presentation.pptx)** &nbsp;·&nbsp;
