@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+code/Result/
+code/Snapshot/
+code/Dataset/
+code/VideoResult/
+*.pth
+*.zip

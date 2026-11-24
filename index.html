@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camouflaged Object Detection in Images &amp; Video with SINet — EE5340 Video Analytics</title>
+<meta name="description" content="EE5340 Video Analytics project report, IIT Guwahati: Camouflaged Object Detection with SINet (CVPR 2020), extended to video with temporal smoothing and centroid tracking.">
+<script>
+/* ================================================================
+   EDIT ONLY THIS BLOCK BEFORE SUBMISSION
+   ================================================================ */
+window.CONFIG = {
+  repoURL:  "https://github.com/akashshukla-github/SINet-COD-VideoAnalytics",
+  pptURL:   "https://github.com/akashshukla-github/SINet-COD-VideoAnalytics/blob/main/assets/ppt/SINet_COD_Presentation.pptx",
+  colabURL: "https://colab.research.google.com/github/akashshukla-github/SINet-COD-VideoAnalytics/blob/main/SINet_Colab_Demo.ipynb",
+  // Paste the YouTube / Google Drive links after you upload the recordings:
+  demoVideoURL: "",        // e.g. "https://youtu.be/XXXXXXXX"  (video demonstration)
+  pptRecordingURL: ""      // e.g. "https://youtu.be/YYYYYYYY"  (screen recording of the PPT)
+};
+</script>
+<script>
+window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']], tags: 'ams' }, svg: { fontCache: 'global' } };
+</script>
+<script defer src="assets/js/tex-svg.js"></script>
+<style>
+:root{
+  --ink:#1d2433; --muted:#5b6475; --line:#e3e7ee; --bg:#f7f8fb; --card:#fff;
+  --accent:#0f766e; --accent2:#b45309; --accent-soft:#e6f4f2; --warn-soft:#fff6e8; --head:#0b1220;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.65;font-size:16.5px}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+header.hero{background:radial-gradient(1200px 400px at 80% -10%,#134e4a 0%,transparent 60%),linear-gradient(135deg,#0b1220,#111a2e);color:#e8edf6;padding:56px 24px 40px}
+.hero .wrap{max-width:1180px;margin:0 auto}
+.tag{display:inline-block;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:#7dd3c7;border:1px solid #2b5f59;padding:3px 10px;border-radius:999px}
+.hero h1{font-size:clamp(28px,4vw,44px);line-height:1.15;margin:14px 0 8px;font-weight:700}
+.hero .sub{color:#b7c2d6;font-size:18px;margin:0 0 22px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px 28px;margin:18px 0 24px;font-size:15px}
+.meta b{color:#fff;display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#7dd3c7;margin-bottom:2px}
+.meta span{color:#dbe3f0}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;background:#1b2a44;color:#e8edf6;border:1px solid #2c3d5e;font-weight:600;font-size:14.5px}
+.btn:hover{background:#22365a;text-decoration:none}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.disabled{opacity:.5;pointer-events:none}
+.layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:250px minmax(0,1fr);gap:36px;padding:32px 24px 80px}
+nav.toc{position:sticky;top:18px;align-self:start;max-height:calc(100vh - 36px);overflow:auto;font-size:14px;border-left:2px solid var(--line);padding-left:14px}
+nav.toc .h{font-weight:700;text-transform:uppercase;font-size:12px;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+nav.toc a{display:block;color:var(--muted);padding:3px 0}
+nav.toc a.sub{padding-left:14px;font-size:13.5px}
+nav.toc a.active{color:var(--accent);font-weight:600}
+main section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:30px 34px;margin-bottom:26px}
+h2{font-size:27px;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+h2 .n{color:var(--accent);margin-right:8px}
+h3{font-size:20px;margin:28px 0 8px}
+h4{font-size:16.5px;margin:20px 0 6px;color:#334}
+p{margin:10px 0}
+figure{margin:20px 0;text-align:center}
+figure img{max-width:100%;border-radius:10px;border:1px solid var(--line);background:#fff}
+figcaption{font-size:14px;color:var(--muted);margin-top:8px;text-align:left}
+figcaption b{color:var(--ink)}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:16px 0}
+.callout.warn{border-color:var(--accent2);background:var(--warn-soft)}
+.callout .t{font-weight:700;display:block;margin-bottom:4px}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:center}
+th{background:#f1f4f8;font-weight:600}
+td.l,th.l{text-align:left}
+tr.best td{background:#ecfdf5;font-weight:700}
+.tablewrap{overflow-x:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fbfcfe}
+.card h4{margin-top:0}
+ul.tight li{margin:3px 0}
+code{background:#f1f4f8;padding:1px 6px;border-radius:5px;font-size:.92em}
+pre{background:#0f172a;color:#e2e8f0;padding:14px 16px;border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.5}
+.eq{overflow-x:auto}
+.chart{width:100%;height:auto}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13.5px;color:var(--muted);justify-content:center}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.refs li{margin:6px 0;font-size:14.5px}
+.video-embed{position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0b1220}
+.video-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.pending{padding:22px;border:2px dashed var(--line);border-radius:12px;text-align:center;color:var(--muted)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:14.5px}
+.kv b{color:var(--muted);font-weight:600}
+footer{text-align:center;color:var(--muted);font-size:13.5px;padding:24px}
+.svgfig svg{max-width:100%;height:auto}
+@media (max-width:900px){.layout{grid-template-columns:1fr}nav.toc{display:none}.grid2,.grid3{grid-template-columns:1fr}main section{padding:22px 18px}}
+@media print{nav.toc,.btns{display:none}.layout{display:block}main section{break-inside:avoid-page;border:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="tag">EE5340 · Video Analytics · Course Project 2026</span>
+    <h1>Camouflaged Object Detection in Images &amp; Video using SINet</h1>
+    <p class="sub">A Search-and-Identification network that finds objects hidden in their surroundings, plus a frame-by-frame video pipeline with temporal smoothing and centroid tracking.</p>
+    <div class="meta">
+      <div><b>Team</b><span>Akash Shukla (264152017)<br>Abdul Quadir (264152001)<br>Sanjeev Singh (264152013)</span></div>
+      <div><b>Course &amp; Faculty</b><span>EE5340 Video Analytics<br>Prof. Prithwijit Guha</span></div>
+      <div><b>Department</b><span>SiSAS, Indian Institute of Technology Guwahati</span></div>
+      <div><b>Base work</b><span>Fan et al., “Camouflaged Object Detection”, CVPR 2020 (Oral) [1]</span></div>
+    </div>
+    <div class="btns">
+      <a class="btn primary" id="btn-repo" href="#">GitHub Repository</a>
+      <a class="btn" id="btn-ppt" href="#">Presentation (PPT)</a>
+      <a class="btn" id="btn-video" href="#sec-video">Video Demonstration</a>
+      <a class="btn" id="btn-colab" href="#">Run in Colab</a>
+      <a class="btn" href="#sec-setup">Setup Guide</a>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc" id="toc">
+  <div class="h">Contents</div>
+  <a href="#sec-intro">1. Introduction</a>
+  <a class="sub" href="#s-motivation">1.1 Motivation</a>
+  <a class="sub" href="#s-apps">1.2 Applications</a>
+  <a class="sub" href="#s-problem">1.3 Problem Statement</a>
+  <a class="sub" href="#s-contrib">1.4 Contributions</a>
+  <a href="#sec-lit">2. Literature Review</a>
+  <a href="#sec-method">3. Methodology</a>
+  <a class="sub" href="#s-workflow">3.1 Overall Workflow</a>
+  <a class="sub" href="#s-backbone">3.2 Feature Extraction</a>
+  <a class="sub" href="#s-rf">3.3 Receptive Field (RF)</a>
+  <a class="sub" href="#s-sm">3.4 Search Module + PDC</a>
+  <a class="sub" href="#s-sa">3.5 Search Attention</a>
+  <a class="sub" href="#s-im">3.6 Identification Module</a>
+  <a class="sub" href="#s-loss">3.7 Loss &amp; Training</a>
+  <a class="sub" href="#s-videoext">3.8 Video Extension</a>
+  <a href="#sec-setup">4. Experimental Setup</a>
+  <a class="sub" href="#s-baselines">4.1 Baselines</a>
+  <a class="sub" href="#s-datasets">4.2 Datasets</a>
+  <a class="sub" href="#s-platform">4.3 Platform</a>
+  <a class="sub" href="#s-metrics">4.4 Evaluation Metrics</a>
+  <a href="#sec-results">5. Results</a>
+  <a class="sub" href="#s-quant">5.1 Quantitative</a>
+  <a class="sub" href="#s-qual">5.2 Qualitative</a>
+  <a class="sub" href="#s-ours">5.3 Our Reproduction</a>
+  <a class="sub" href="#s-videores">5.4 Video Results</a>
+  <a class="sub" href="#s-discuss">5.5 Discussion</a>
+  <a class="sub" href="#s-fail">5.6 Failure Cases</a>
+  <a href="#sec-concl">6. Conclusion</a>
+  <a href="#sec-refs">7. References</a>
+  <a href="#sec-ppt">8. PPT File</a>
+  <a href="#sec-video">9. Video &amp; Recording</a>
+</nav>
+
+<main>
+
+<!-- ============================ 1. INTRODUCTION ============================ -->
+<section id="sec-intro">
+<h2><span class="n">1.</span>Introduction</h2>
+
+<h3 id="s-motivation">1.1 Motivation</h3>
+<p>Most detection and segmentation systems are built for objects that <em>stand out</em>: a person on a road, a car against the sky. Camouflaged objects are the opposite. A stick insect on a branch, a flatfish on sand or a snow leopard on rock has evolved so that its colour, texture and even its outline match the background. Humans often need several seconds, and sometimes motion, to notice them.</p>
+<p><b>Camouflaged Object Detection (COD)</b> asks a network to produce a pixel-wise map of such objects. This is harder than Salient Object Detection (SOD), because the cues SOD relies on (strong contrast, distinct colour, clear boundaries) are deliberately suppressed. The figure below shows the same image under different tasks.</p>
+<figure>
+  <img src="assets/img/camouflagedtask.png" alt="Task comparison: image, panoptic segmentation, salient object detection, camouflaged object detection" loading="lazy">
+  <figcaption><b>Figure 1.</b> Task relationship. (a) Input, (b) panoptic segmentation, (c) salient instance/object detection, (d) camouflaged object detection. The two butterflies blend with the bananas, so their boundaries are hard to see. Source: SINet repository [1].</figcaption>
+</figure>
+<p><b>Why this belongs in Video Analytics.</b> In a video, camouflage is often “broken” only over time: an animal becomes visible when it moves, and a still detector may flicker between frames. Understanding a strong single-frame COD model, and then studying how it behaves frame-to-frame, connects directly to the course pipeline <i>image → frame → sequence → temporal information → motion → object → track</i>.</p>
+
+<h3 id="s-apps">1.2 Applications</h3>
+<div class="grid3">
+  <div class="card"><h4>Medical imaging</h4>Polyp and lung-infection segmentation, where lesions have low contrast with surrounding tissue.</div>
+  <div class="card"><h4>Agriculture</h4>Locust and pest detection on crops to prevent invasions.</div>
+  <div class="card"><h4>Search &amp; rescue / surveillance</h4>Finding people or objects hidden in cluttered terrain from drones and cameras.</div>
+  <div class="card"><h4>Wildlife monitoring</h4>Rare-species discovery and camera-trap analysis.</div>
+  <div class="card"><h4>Industrial inspection</h4>Surface-defect detection on textured materials.</div>
+  <div class="card"><h4>Robotics perception</h4>Robust segmentation for autonomous systems operating in natural, low-contrast scenes.</div>
+</div>
+<div class="grid2">
+  <figure><img src="assets/img/polypsegmentation.jpg" alt="Polyp segmentation example" loading="lazy"><figcaption><b>Figure 2a.</b> Medical: polyp segmentation [1].</figcaption></figure>
+  <figure><img src="assets/img/locust_detection.jpg" alt="Locust detection example" loading="lazy"><figcaption><b>Figure 2b.</b> Agriculture: locust detection [1].</figcaption></figure>
+  <figure><img src="assets/img/search-and-rescue.png" alt="Search and rescue example" loading="lazy"><figcaption><b>Figure 2c.</b> Search and rescue [1].</figcaption></figure>
+  <figure><img src="assets/img/surface_defect_detection2.jpg" alt="Surface defect detection example" loading="lazy"><figcaption><b>Figure 2d.</b> Surface-defect detection [1].</figcaption></figure>
+</div>
+
+<h3 id="s-problem">1.3 Problem Statement</h3>
+<div class="callout"><span class="t">Formal problem</span>
+Given an RGB image \(I \in \mathbb{R}^{H\times W\times 3}\), predict a camouflage map \(C \in [0,1]^{H\times W}\), where \(C(x,y)\) is the confidence that pixel \((x,y)\) belongs to a camouflaged object. Training uses binary ground truth \(G \in \{0,1\}^{H\times W}\).<br><br>
+<b>Video extension:</b> given a sequence of frames \(\{I_t\}_{t=1}^{T}\), produce temporally stable maps \(\{S_t\}\), binary masks \(\{M_t\}\) and a centroid track \(\{(x_c,y_c)_t\}\) of the camouflaged object.
+</div>
+
+<h3 id="s-contrib">1.4 Contributions</h3>
+<p>The base work [1] contributes the COD10K dataset, a full benchmark, and the SINet baseline. In this course project, <b>our group’s contributions</b> are:</p>
+<ol>
+  <li><b>Workflow extraction and explanation.</b> We reconstructed SINet’s complete data flow from the repository README diagrams <em>and</em> the source code, including tensor shapes at every stage, and wrote out the RF, PDC and Search-Attention operations as equations.</li>
+  <li><b>Code-vs-paper verification.</b> We found and documented three places where the released code differs from the paper text (Section 5.5): the Gaussian kernel parameters, the missing ReLU in <code>BasicConv2d</code>, and the corrected index range of the PDC equation.</li>
+  <li><b>Modernised inference.</b> The released <code>MyTest.py</code> depends on <code>scipy.misc.imsave</code>, which was removed from SciPy. We wrote <code>test_images.py</code>, which runs on current PyTorch, and computes MAE, IoU and \(F_\beta\) and saves result and failure-case panels.</li>
+  <li><b>Video extension.</b> We wrote <code>video_inference.py</code>, which applies SINet frame-by-frame, adds exponential-moving-average temporal smoothing, extracts the largest connected component and logs a bounding box and centroid track per frame.</li>
+  <li><b>Reproducible package.</b> A one-click Colab notebook, this report page, a presentation and a setup guide.</li>
+</ol>
+</section>
+
+<!-- ============================ 2. LITERATURE ============================ -->
+<section id="sec-lit">
+<h2><span class="n">2.</span>Brief Literature Review</h2>
+<h4>2.1 Generic and salient object detection</h4>
+<p>Generic detectors and segmenters such as FPN [4], Mask R-CNN [5] and PSPNet [6] learn to localise everyday object categories. Salient Object Detection (SOD) methods such as PiCANet [7], BASNet [8], CPD [9] and EGNet [10] instead find the region that attracts human attention first. Both families assume the target is visually distinct from its background. Camouflage violates exactly that assumption, so these models are used as <em>baselines</em> in [1] and perform noticeably worse on COD (Table 1).</p>
+<h4>2.2 Camouflage in biology and early vision</h4>
+<p>Biologists (Thayer, Cott; survey by Stevens and Merilaita [11]) describe camouflage strategies such as background matching and disruptive colouration. Early computer-vision approaches used hand-crafted cues: texture, colour statistics, 3D convexity and motion. They worked only in narrow, controlled settings.</p>
+<h4>2.3 COD datasets and deep methods</h4>
+<p>CHAMELEON [12] (76 images) and CAMO [13] (2,500 images, with the ANet two-stream baseline) were the first COD datasets. They were small and had coarse annotations. Fan et al. [1] introduced <b>COD10K</b> (10,000 images, dense hierarchical annotations) and <b>SINet</b>, which is inspired by how a predator first <em>searches</em> for prey and then <em>identifies</em> it.</p>
+<h4>2.4 Building blocks used by SINet</h4>
+<ul class="tight">
+  <li><b>ResNet-50</b> [14]: the backbone feature extractor.</li>
+  <li><b>Receptive Field Block (RFB)</b> [15]: multi-branch dilated convolutions that mimic the receptive fields of the human visual system.</li>
+  <li><b>Cascaded Partial Decoder (CPD)</b> [9]: aggregates only higher-level features for speed, and introduces <em>holistic attention</em>, which SINet reuses as Search Attention.</li>
+</ul>
+<h4>2.5 Later work</h4>
+<p>SINet-V2 [2] (TPAMI 2022) refines the same search-and-identify idea with texture-enhanced modules and group-reversal attention. MoCA [3] extends COD to video, using motion to reveal camouflaged animals. Our video extension is a lightweight step in that direction.</p>
+</section>
+
+<!-- ============================ 3. METHODOLOGY ============================ -->
+<section id="sec-method">
+<h2><span class="n">3.</span>Methodology</h2>
+<p>SINet has two stages that copy a predator’s behaviour: a <b>Search Module (SM)</b> roughly locates candidate regions, and an <b>Identification Module (IM)</b> precisely segments the object. A <b>Search Attention (SA)</b> block connects them. Every multi-scale feature passes through a <b>Receptive Field (RF)</b> block, and each stage decodes its features with a <b>Partial Decoder Component (PDC)</b>.</p>
+
+<h3 id="s-workflow">3.1 Overall Workflow</h3>
+<figure>
+  <img src="assets/img/sinet.png" alt="SINet architecture from the official repository" loading="lazy">
+  <figcaption><b>Figure 3.</b> Original SINet framework from the repository README [1]: ResNet+RF, PDC, and the cross-entropy loss on both stages. Inset: RF block (bottom-left) and Partial Decoder Component (right).</figcaption>
+</figure>
+<p>From that diagram and from <code>Src/SINet.py</code>, we extracted the following simplified workflow. Shapes assume a 352×352 input, with \(C{=}32\) channels after each RF block.</p>
+<figure class="svgfig">
+<svg viewBox="0 0 1100 470" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,Arial,sans-serif" font-size="13">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+    <style>.b{fill:#fff;stroke:#94a3b8;stroke-width:1.4;rx:8}.bk{fill:#e0f2fe;stroke:#0284c7}.rf{fill:#f1f5f9;stroke:#64748b}.pd{fill:#fee2e2;stroke:#dc2626}.sa{fill:#dcfce7;stroke:#16a34a}.ls{fill:#fef3c7;stroke:#d97706}.l{stroke:#475569;stroke-width:1.5;fill:none;marker-end:url(#ar)}.s{font-size:11px;fill:#475569}.h{font-weight:700;font-size:14px}</style>
+  </defs>
+  <rect x="10" y="10" width="1080" height="200" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="5 4"/>
+  <text x="22" y="32" class="h" fill="#0369a1">STAGE 1 — SEARCH MODULE (where might the object be?)</text>
+  <rect x="10" y="250" width="1080" height="210" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="5 4"/>
+  <text x="22" y="272" class="h" fill="#15803d">STAGE 2 — IDENTIFICATION MODULE (what exactly is the object?)</text>
+
+  <rect class="b bk" x="25" y="70" width="95" height="60"/><text x="72" y="96" text-anchor="middle" class="h">Image I</text><text x="72" y="114" text-anchor="middle" class="s">352×352×3</text>
+  <rect class="b bk" x="150" y="50" width="150" height="100"/><text x="225" y="72" text-anchor="middle" class="h">ResNet-50 (shared)</text>
+  <text x="225" y="92" text-anchor="middle" class="s">X₀: 88×88×64</text><text x="225" y="108" text-anchor="middle" class="s">X₁: 88×88×256</text><text x="225" y="124" text-anchor="middle" class="s">X₂: 44×44×512</text>
+  <rect class="b bk" x="330" y="50" width="140" height="100"/><text x="400" y="70" text-anchor="middle" class="h">Search branch</text>
+  <text x="400" y="88" text-anchor="middle" class="s">X₃ = layer3_1(X₂)</text><text x="400" y="103" text-anchor="middle" class="s">22×22×1024</text><text x="400" y="122" text-anchor="middle" class="s">X₄ = layer4_1(X₃)</text><text x="400" y="137" text-anchor="middle" class="s">11×11×2048</text>
+  <rect class="b rf" x="500" y="42" width="215" height="122"/><text x="607" y="62" text-anchor="middle" class="h">4 × RF (→ 32 ch)</text>
+  <text x="510" y="82" class="s">rf₄ˢ = RF(DOWN×2[X₀;X₁])  320→32</text>
+  <text x="510" y="100" class="s">rf₃ˢ = RF([X₂;UP X₃;UP X₄]) 3584→32</text>
+  <text x="510" y="118" class="s">rf₂ˢ = RF([X₃;UP X₄])  3072→32</text>
+  <text x="510" y="136" class="s">rf₁ˢ = RF(X₄)  2048→32</text>
+  <rect class="b pd" x="745" y="70" width="110" height="60"/><text x="800" y="96" text-anchor="middle" class="h">PDₛ</text><text x="800" y="114" text-anchor="middle" class="s">Cₛ: 44×44×1</text>
+  <rect class="b ls" x="900" y="70" width="170" height="60"/><text x="985" y="94" text-anchor="middle" class="h">UP×8 → C_csm</text><text x="985" y="112" text-anchor="middle" class="s">Lˢ = BCE(C_csm, G)</text>
+  <path class="l" d="M120,100 H148"/><path class="l" d="M300,100 H328"/><path class="l" d="M470,100 H498"/><path class="l" d="M715,100 H743"/><path class="l" d="M855,100 H898"/>
+
+  <rect class="b sa" x="745" y="172" width="110" height="56"/><text x="800" y="196" text-anchor="middle" class="h">SA</text><text x="800" y="214" text-anchor="middle" class="s">Gaussian + max</text>
+  <path class="l" d="M800,130 V170"/><text x="806" y="156" class="s">σ(Cₛ)</text>
+  <path class="l" d="M225,150 V200 H743"/><text x="400" y="194" class="s">X₂ (44×44×512)</text>
+  <path class="l" d="M800,228 V300 H700"/><text x="806" y="262" class="s">C_h = X₂ ⊗ attention</text>
+
+  <rect class="b bk" x="470" y="300" width="228" height="80"/><text x="584" y="322" text-anchor="middle" class="h">Identification branch</text>
+  <text x="584" y="344" text-anchor="middle" class="s">X₃′ = layer3_2(C_h): 22×22×1024</text><text x="584" y="362" text-anchor="middle" class="s">X₄′ = layer4_2(X₃′): 11×11×2048</text>
+  <rect class="b rf" x="230" y="300" width="210" height="96"/><text x="335" y="322" text-anchor="middle" class="h">3 × RF (→ 32 ch)</text>
+  <text x="240" y="344" class="s">rf₃ⁱ = RF(C_h)   512→32</text><text x="240" y="362" class="s">rf₂ⁱ = RF(X₃′) 1024→32</text><text x="240" y="380" class="s">rf₁ⁱ = RF(X₄′) 2048→32</text>
+  <rect class="b pd" x="80" y="310" width="110" height="60"/><text x="135" y="336" text-anchor="middle" class="h">PDᵢ</text><text x="135" y="354" text-anchor="middle" class="s">Cᵢ: 44×44×1</text>
+  <path class="l" d="M470,340 H442"/><path class="l" d="M230,340 H192"/>
+  <rect class="b ls" x="40" y="400" width="190" height="50"/><text x="135" y="421" text-anchor="middle" class="h">UP×8 → C_cim</text><text x="135" y="438" text-anchor="middle" class="s">Lⁱ = BCE(C_cim, G)</text>
+  <path class="l" d="M135,370 V398"/>
+  <rect class="b" x="300" y="410" width="440" height="40" style="fill:#f0fdfa;stroke:#0f766e"/><text x="520" y="434" text-anchor="middle" font-size="12.5" font-weight="700">Inference output: σ(C_cim) → resize to H×W → min-max normalise</text>
+  <path class="l" d="M230,425 H298"/>
+  <rect class="b" x="760" y="330" width="310" height="110" style="fill:#fff7ed;stroke:#c2410c"/>
+  <text x="915" y="352" text-anchor="middle" class="h" fill="#9a3412">OUR VIDEO EXTENSION</text>
+  <text x="772" y="374" class="s">for each frame t: Cₜ = SINet(Iₜ)</text>
+  <text x="772" y="392" class="s">Sₜ = α Cₜ + (1−α) Sₜ₋₁  (temporal EMA)</text>
+  <text x="772" y="410" class="s">Mₜ = 1[Sₜ ≥ τ] → largest component → box</text>
+  <text x="772" y="428" class="s">centroid (x_c,y_c)ₜ → track + displacement dₜ</text>
+  <path class="l" d="M740,430 H758"/>
+</svg>
+<figcaption><b>Figure 4.</b> Workflow we extracted from the README figure and <code>SINet.py</code>. Blue: backbone (ResNet-50, weights duplicated for the two branches via <code>layer3_1/layer3_2</code>, <code>layer4_1/layer4_2</code>). Grey: RF blocks. Red: partial decoders. Green: search attention. Orange: our video extension.</figcaption>
+</figure>
+
+<h4>Step-by-step data flow</h4>
+<ol>
+  <li><b>Input.</b> Resize to 352×352, normalise with ImageNet mean/std.</li>
+  <li><b>Shared low/mid features.</b> ResNet-50 conv1 → maxpool → layer1 → layer2 gives \(X_0, X_1, X_2\).</li>
+  <li><b>Search branch.</b> layer3_1 and layer4_1 give \(X_3, X_4\). Dense concatenation of upsampled deeper features gives four multi-scale inputs, each passed through an RF block.</li>
+  <li><b>Coarse map.</b> \(PD_s\) fuses \(rf^s_1..rf^s_4\) into the coarse map \(C_s\) (44×44).</li>
+  <li><b>Search attention.</b> \(\sigma(C_s)\) is blurred with a Gaussian, min-max normalised and max-ed with itself, then multiplied with \(X_2\) to give \(C_h\).</li>
+  <li><b>Identification branch.</b> A second copy of layer3/layer4 processes \(C_h\). Three RF outputs go into \(PD_i\) and produce the refined map \(C_i\).</li>
+  <li><b>Supervision.</b> Both maps are upsampled ×8 to 352×352 and trained with BCE against the same ground truth \(G\).</li>
+</ol>
+
+<h3 id="s-backbone">3.2 Feature Extraction (ResNet-50)</h3>
+<div class="tablewrap"><table>
+<tr><th>Symbol</th><th>Layer</th><th>Size (H×W×C)</th><th>Stride</th><th>Role</th></tr>
+<tr><td>\(X_0\)</td><td class="l">conv1 + BN + ReLU + maxpool</td><td>88×88×64</td><td>4</td><td class="l">edges, colour, fine texture</td></tr>
+<tr><td>\(X_1\)</td><td class="l">layer1</td><td>88×88×256</td><td>4</td><td class="l">low-level texture</td></tr>
+<tr><td>\(X_2\)</td><td class="l">layer2</td><td>44×44×512</td><td>8</td><td class="l">mid-level parts, shared by both stages</td></tr>
+<tr><td>\(X_3\) / \(X_3'\)</td><td class="l">layer3_1 / layer3_2</td><td>22×22×1024</td><td>16</td><td class="l">object-level semantics</td></tr>
+<tr><td>\(X_4\) / \(X_4'\)</td><td class="l">layer4_1 / layer4_2</td><td>11×11×2048</td><td>32</td><td class="l">global context</td></tr>
+</table></div>
+<p>Both copies of layer3/layer4 are initialised from the same ImageNet-pretrained ResNet-50 (<code>initialize_weights</code>) but are trained independently.</p>
+
+<h3 id="s-rf">3.3 Receptive Field (RF) Module</h3>
+<p><b>Why it is needed.</b> A camouflaged object can be tiny (a pipefish) or large (a leopard), and the cue that gives it away may be local (a texture seam) or global (a body outline). RF gives each scale several receptive-field sizes at once, without the cost of large kernels.</p>
+<p>Let \(\mathrm{Bconv}_{k}\) denote convolution with kernel \(k\) followed by batch normalisation, and \(\mathrm{Dil}_{d}\) a 3×3 convolution with dilation \(d\). For an input feature \(x\):</p>
+<div class="eq">\[
+\begin{aligned}
+b_0 &= \mathrm{Bconv}_{1\times1}(x)\\
+b_n &= \mathrm{Dil}_{2n+1}\Big(\mathrm{Bconv}_{(2n+1)\times1}\big(\mathrm{Bconv}_{1\times(2n+1)}(\mathrm{Bconv}_{1\times1}(x))\big)\Big),\quad n=1,2,3\\
+\mathrm{RF}(x) &= \mathrm{ReLU}\Big(\mathrm{Bconv}_{3\times3}\big([\,b_0;\,b_1;\,b_2;\,b_3\,]\big) + \mathrm{Bconv}_{1\times1}(x)\Big)
+\end{aligned}
+\]</div>
+<p>So the branches use kernels 1, 3, 5, 7 with dilations 1, 3, 5, 7. \([\cdot;\cdot]\) is channel concatenation, and the last term is a residual shortcut. The 1×k then k×1 factorisation keeps the parameter count low. A 3×3 kernel with dilation \(d\) covers a \((2d{+}1)\times(2d{+}1)\) window, so branch 3 sees 15×15 at the cost of 9 weights.</p>
+
+<h3 id="s-sm">3.4 Search Module and Partial Decoder Component (PDC)</h3>
+<p><b>Dense multi-scale inputs.</b> Before the RF blocks, each level is concatenated with all deeper levels, upsampled to its resolution:</p>
+<div class="eq">\[
+\begin{aligned}
+rf^s_4&=\mathrm{RF}\big(\mathrm{DOWN}_{\times2}[X_0;X_1]\big), &
+rf^s_3&=\mathrm{RF}\big([X_2;\mathrm{UP}_{\times2}X_3;\mathrm{UP}_{\times4}X_4]\big),\\
+rf^s_2&=\mathrm{RF}\big([X_3;\mathrm{UP}_{\times2}X_4]\big), &
+rf^s_1&=\mathrm{RF}(X_4)
+\end{aligned}
+\]</div>
+<p>The coarse camouflage map from the search stage is (paper Eq. 1):</p>
+<div class="eq">\[ C_s = PD_s\big(rf^s_1,\, rf^s_2,\, rf^s_3,\, rf^s_4\big) \]</div>
+<p><b>Inside the PDC.</b> The paper writes the feature update as Eq. (4). The authors later corrected the index range in the README (2020/10/22 note), so we write it in the corrected form, where level 1 is the deepest:</p>
+<div class="eq">\[ rf^{c2}_k \;=\; rf^{c1}_k \,\otimes \prod_{j=1}^{k-1} \mathrm{Bconv}\big(\mathrm{UP}_{2^{\,k-j}}(rf^{c1}_j)\big) \]</div>
+<p>Here \(\otimes\) is element-wise multiplication. Reading <code>PDC_SM.forward</code>, with \(r_1\) the deepest (11×11) and \(r_3\) at 44×44, the concrete computation is:</p>
+<div class="eq">\[
+\begin{aligned}
+r_2' &= \mathrm{B}(\mathrm{UP}\,r_1)\otimes r_2, \qquad
+r_3' = \mathrm{B}(\mathrm{UP}^2 r_1)\otimes \mathrm{B}(\mathrm{UP}\,r_2)\otimes r_3\\
+r_2'' &= \mathrm{B}\big([\,r_2';\ \mathrm{B}(\mathrm{UP}\,r_1)\,]\big)\\
+r_3'' &= \mathrm{B}\big([\,r_3';\ \mathrm{B}(\mathrm{UP}\,r_2'');\ rf^s_4\,]\big)\quad(\text{4C channels; } PD_i \text{ omits } rf_4 \Rightarrow 3C)\\
+C &= \mathrm{Conv}_{1\times1}\big(\mathrm{B}(r_3'')\big)\in\mathbb{R}^{44\times44\times1}
+\end{aligned}
+\]</div>
+<div class="callout"><span class="t">Intuition</span>The multiplications act as a gate. A location keeps a high response at the fine scale only if <em>every</em> deeper (more semantic) level also responds there. Deep features say “roughly here”, and shallow features add the exact boundary. The decoder is called <em>partial</em> because it skips the shallowest features (\(X_0, X_1\) enter only through \(rf^s_4\)), which saves computation.</div>
+
+<h3 id="s-sa">3.5 Search Attention (SA)</h3>
+<p><b>Problem.</b> \(C_s\) is coarse. It often catches only the most visible part of the object, such as the head of an owl but not the body behind the branch. SA <em>enlarges</em> the searched region before identification.</p>
+<p>Paper form (Eq. 2): \( C_h = f_{\max}\big(g(X_2,\sigma,\lambda),\,C_s\big) \). From <code>SearchAttention.py</code>, the exact operation is:</p>
+<div class="eq">\[
+\begin{aligned}
+A &= \sigma(C_s) \qquad\text{(sigmoid, 44×44)}\\
+\tilde A &= \mathcal{N}\big(\mathcal{G}_{31,\,4} * A\big),\qquad \mathcal{N}(z)=\frac{z-\min z}{\max z-\min z+\epsilon}\\
+C_h &= X_2 \otimes \max\big(\tilde A,\ A\big)
+\end{aligned}
+\]</div>
+<p>Here \(\mathcal{G}_{31,4}\) is a 31×31 Gaussian kernel spanning ±4 standard deviations, and \(*\) is 2D convolution with padding 15. The blur spreads attention to the neighbourhood of every detected pixel. Min-max normalisation restores the range [0, 1]. The pixel-wise max guarantees that confident pixels in \(A\) are never weakened, and the product with \(X_2\) suppresses background features before identification.</p>
+
+<h3 id="s-im">3.6 Identification Module</h3>
+<div class="eq">\[
+X_3'=\mathrm{layer3\_2}(C_h),\quad X_4'=\mathrm{layer4\_2}(X_3'),\qquad
+C_i = PD_i\big(\mathrm{RF}(X_4'),\,\mathrm{RF}(X_3'),\,\mathrm{RF}(C_h)\big)
+\]</div>
+<p>This is paper Eq. 3. Because the features are now focused on the searched region, \(C_i\) is sharper and more complete than \(C_s\). At test time only \(C_i\) is used.</p>
+
+<h3 id="s-loss">3.7 Loss Function and Training</h3>
+<p>Both maps are upsampled ×8 to the 352×352 ground truth and supervised with binary cross-entropy on logits (<code>BCEWithLogitsLoss</code>):</p>
+<div class="eq">\[
+\mathcal{L}_{CE}(C,G) = -\frac{1}{N}\sum_{p=1}^{N}\Big[G_p\log\sigma(C_p) + (1-G_p)\log\big(1-\sigma(C_p)\big)\Big],\qquad
+\mathcal{L} = \mathcal{L}^{s}_{CE}(C_{csm},G) + \mathcal{L}^{i}_{CE}(C_{cim},G)
+\]</div>
+<p>Supervising \(C_s\) as well (deep supervision) forces the search stage to output a meaningful attention map, rather than letting the gradient reach it only through the identification stage.</p>
+<p><b>Inference.</b> \(\hat C = \mathcal{N}\big(\sigma(\mathrm{resize}_{H\times W}(C_{cim}))\big)\).</p>
+
+<h3 id="s-videoext">3.8 Our Extension: SINet on Video</h3>
+<p>SINet processes one image at a time. Applied naively to a video, its output can flicker because each frame is predicted independently. Our <code>video_inference.py</code> adds a light temporal layer on top:</p>
+<div class="eq">\[
+\begin{aligned}
+C_t &= \hat C(I_t) &&\text{SINet map of frame } t\\
+S_t &= \alpha\,C_t + (1-\alpha)\,S_{t-1},\quad S_1=C_1 &&\text{temporal EMA (default } \alpha=0.6)\\
+M_t &= \mathbb{1}\,[\,S_t \ge \tau\,] &&\text{binary mask (default } \tau=0.5)\\
+(x_c,y_c)_t &= \frac{1}{|\Omega_t|}\sum_{(x,y)\in\Omega_t}(x,y) &&\Omega_t=\text{largest 8-connected component of } M_t\\
+d_t &= \big\|(x_c,y_c)_t-(x_c,y_c)_{t-1}\big\|_2 &&\text{displacement in px/frame}
+\end{aligned}
+\]</div>
+<p>The EMA is a first-order IIR low-pass filter over time. Unrolling it gives \(S_t=\sum_{k\ge0}\alpha(1-\alpha)^k C_{t-k}\), so a frame \(k\) steps old has weight \(\alpha(1-\alpha)^k\). With \(\alpha=0.6\), the previous frame contributes 24% and two frames back about 10%. Smaller \(\alpha\) gives a more stable mask but a slower response to motion. For each frame the script writes an overlay (mask + bounding box + centroid), a heat-map video and a CSV row: frame, detected, box, area, centroid, displacement, mean confidence. This turns per-frame detection into an <b>object track</b>, which is the IMAGE → FRAME → SEQUENCE → OBJECT → TRACK chain of the course.</p>
+</section>
+
+<!-- ============================ 4. SETUP ============================ -->
+<section id="sec-setup">
+<h2><span class="n">4.</span>Experimental Setup</h2>
+
+<h3 id="s-baselines">4.1 Baseline Algorithms</h3>
+<p>The base work [1] compares SINet with 12 state-of-the-art methods, all retrained on the same data:</p>
+<div class="tablewrap"><table>
+<tr><th class="l">Family</th><th class="l">Methods</th></tr>
+<tr><td class="l">Generic detection / segmentation</td><td class="l">FPN, Mask R-CNN, PSPNet, UNet++, MSRCNN, HTC</td></tr>
+<tr><td class="l">Salient object detection</td><td class="l">PiCANet, BASNet, PFANet, CPD, EGNet</td></tr>
+<tr><td class="l">Camouflage-specific</td><td class="l">ANet-SRM</td></tr>
+</table></div>
+
+<h3 id="s-datasets">4.2 Datasets</h3>
+<div class="tablewrap"><table>
+<tr><th>Dataset</th><th>Images</th><th>Train / Test</th><th class="l">Notes</th></tr>
+<tr><td><b>COD10K</b> [1]</td><td>10,000</td><td>6,000 / 4,000</td><td class="l">5,066 camouflaged, 3,000 background, 1,934 non-camouflaged; 5 super-classes, 69 sub-classes; object-, instance- and edge-level masks, boxes and attributes</td></tr>
+<tr><td>CAMO [13]</td><td>2,500</td><td>2,000 / 500</td><td class="l">8 categories; half camouflaged, half from MS-COCO</td></tr>
+<tr><td>CHAMELEON [12]</td><td>76</td><td>– / 76</td><td class="l">Test-only, object-level ground truth</td></tr>
+</table></div>
+<p>Training setting (iii) of [1] uses CAMO + COD10K (+ extra) training images. The released test package contains COD10K-test, CAMO-test and CHAMELEON.</p>
+<figure><img src="assets/img/cod10k-2.jpg" alt="COD10K annotation diversity" loading="lazy"><figcaption><b>Figure 5.</b> Annotation diversity in COD10K: edge-, object- and instance-level masks, bounding boxes and attributes [1].</figcaption></figure>
+
+<h3 id="s-platform">4.3 Implementation Platform</h3>
+<div class="grid2">
+<div class="card"><h4>Original training (authors [1])</h4>
+<div class="kv"><b>Framework</b><span>PyTorch 1.3.1, NVIDIA Apex (O1 mixed precision)</span>
+<b>Hardware</b><span>NVIDIA TITAN RTX 24 GB, Intel i9-9820X</span>
+<b>Input</b><span>352×352</span>
+<b>Optimiser</b><span>Adam, lr = 1e-4, ×0.1 every 30 epochs</span>
+<b>Batch / epochs</b><span>36 / 40 (released model “SINet_40”)</span>
+<b>Inference</b><span>≈0.2 s per image (reported)</span></div></div>
+<div class="card"><h4>Our runs</h4>
+<div class="kv"><b>Framework</b><span>PyTorch 2.x, OpenCV, NumPy</span>
+<b>Hardware</b><span>Google Colab (NVIDIA T4 GPU)</span>
+<b>Model</b><span>Released pretrained SINet_40.pth</span>
+<b>Parameters</b><span>≈48.9 M (we counted in code)</span>
+<b>Scripts</b><span><code>test_images.py</code>, <code>video_inference.py</code></span>
+<b>Video params</b><span>α = 0.6, τ = 0.5</span></div></div>
+</div>
+
+<h3 id="s-metrics">4.4 Evaluation Metrics</h3>
+<p>Let \(C\) be the prediction and \(G\) the ground truth, both of size \(W\times H\).</p>
+<ul>
+<li><b>Mean Absolute Error (lower is better)</b>
+<div class="eq">\[ \mathcal{M}=\frac{1}{W H}\sum_{x=1}^{W}\sum_{y=1}^{H}\big|C(x,y)-G(x,y)\big| \]</div></li>
+<li><b>Structure-measure \(S_\alpha\) (higher is better).</b> Combines object-aware (\(S_o\)) and region-aware (\(S_r\)) structural similarity: \( S_\alpha=\alpha\,S_o+(1-\alpha)\,S_r,\ \alpha=0.5 \) (as in <code>StructureMeasure.m</code>).</li>
+<li><b>Enhanced-alignment measure \(E_\phi\) (higher is better).</b> With bias matrices \(\varphi_I = I-\mu_I\):
+<div class="eq">\[ \xi=\frac{2\,\varphi_G\circ\varphi_C}{\varphi_G\circ\varphi_G+\varphi_C\circ\varphi_C},\qquad E_\phi=\frac{1}{WH}\sum_{x,y}\frac{(1+\xi(x,y))^2}{4} \]</div>
+This captures pixel-level matching and image-level statistics together; the mean over thresholds is reported.</li>
+<li><b>Weighted F-measure \(F^w_\beta\) (higher is better).</b>
+<div class="eq">\[ F^{w}_{\beta}=\frac{(1+\beta^2)\,\mathrm{Precision}^w\cdot \mathrm{Recall}^w}{\beta^2\,\mathrm{Precision}^w+\mathrm{Recall}^w} \]</div>
+Precision and recall are weighted by pixel location and dependency. The toolbox uses \(\beta=1\) (<code>original_WFb.m</code>).</li>
+<li><b>Our quick metrics</b> in <code>test_images.py</code>: MAE, IoU at threshold 0.5, and \(F_\beta\) at threshold 0.5 with \(\beta^2=0.3\). The official \(S_\alpha, E_\phi, F^w_\beta\) are computed with the MATLAB toolbox in <code>code/EvaluationTool/main.m</code>.</li>
+</ul>
+</section>
+
+<!-- ============================ 5. RESULTS ============================ -->
+<section id="sec-results">
+<h2><span class="n">5.</span>Results</h2>
+
+<h3 id="s-quant">5.1 Quantitative Results</h3>
+<p><b>Table 1.</b> COD10K-test, SINet vs. 12 baselines (numbers from the SINet repository [1]). ↑ higher is better, ↓ lower is better.</p>
+<div class="tablewrap"><table>
+<tr><th class="l">Model</th><th>Year</th><th>\(S_\alpha\)↑</th><th>\(E_\phi\)↑</th><th>\(F^w_\beta\)↑</th><th>\(\mathcal{M}\)↓</th></tr>
+<tr><td class="l">FPN</td><td>2017</td><td>0.697</td><td>0.691</td><td>0.411</td><td>0.075</td></tr>
+<tr><td class="l">Mask R-CNN</td><td>2017</td><td>0.613</td><td>0.748</td><td>0.402</td><td>0.080</td></tr>
+<tr><td class="l">PSPNet</td><td>2017</td><td>0.678</td><td>0.680</td><td>0.377</td><td>0.080</td></tr>
+<tr><td class="l">UNet++</td><td>2018</td><td>0.623</td><td>0.672</td><td>0.350</td><td>0.086</td></tr>
+<tr><td class="l">PiCANet</td><td>2018</td><td>0.649</td><td>0.643</td><td>0.322</td><td>0.090</td></tr>
+<tr><td class="l">MSRCNN</td><td>2019</td><td>0.641</td><td>0.706</td><td>0.419</td><td>0.073</td></tr>
+<tr><td class="l">BASNet</td><td>2019</td><td>0.634</td><td>0.678</td><td>0.365</td><td>0.105</td></tr>
+<tr><td class="l">PFANet</td><td>2019</td><td>0.636</td><td>0.618</td><td>0.286</td><td>0.128</td></tr>
+<tr><td class="l">HTC</td><td>2019</td><td>0.548</td><td>0.520</td><td>0.221</td><td>0.088</td></tr>
+<tr><td class="l">CPD</td><td>2019</td><td>0.747</td><td>0.770</td><td>0.508</td><td>0.059</td></tr>
+<tr><td class="l">EGNet</td><td>2019</td><td>0.737</td><td>0.779</td><td>0.509</td><td>0.056</td></tr>
+<tr class="best"><td class="l">SINet</td><td>2020</td><td>0.771</td><td>0.806</td><td>0.551</td><td>0.051</td></tr>
+</table></div>
+
+<figure>
+<svg id="chart1" class="chart" viewBox="0 0 1000 340" xmlns="http://www.w3.org/2000/svg"></svg>
+<div class="legend"><span><i style="background:#94a3b8"></i>Baselines</span><span><i style="background:#0f766e"></i>SINet</span></div>
+<figcaption><b>Figure 6.</b> \(S_\alpha\) and \(F^w_\beta\) on COD10K-test, sorted. SINet is best on both. The strongest baselines are the SOD models CPD and EGNet, which also use multi-level decoders.</figcaption>
+</figure>
+
+<p><b>Table 2.</b> SINet on all three test sets. The ◇ row is the authors’ retrained model with Apex mixed precision, 40 epochs (the released weights) [1].</p>
+<div class="tablewrap"><table>
+<tr><th rowspan="2" class="l">Model</th><th colspan="4">CHAMELEON</th><th colspan="4">CAMO-Test</th><th colspan="4">COD10K-Test</th></tr>
+<tr><th>\(S_\alpha\)</th><th>\(E_\phi\)</th><th>\(F^w_\beta\)</th><th>\(\mathcal M\)</th><th>\(S_\alpha\)</th><th>\(E_\phi\)</th><th>\(F^w_\beta\)</th><th>\(\mathcal M\)</th><th>\(S_\alpha\)</th><th>\(E_\phi\)</th><th>\(F^w_\beta\)</th><th>\(\mathcal M\)</th></tr>
+<tr><td class="l">SINet (paper)</td><td>0.869</td><td>0.891</td><td>0.740</td><td>0.044</td><td><b>0.751</b></td><td>0.771</td><td>0.606</td><td>0.100</td><td>0.771</td><td>0.806</td><td>0.551</td><td>0.051</td></tr>
+<tr class="best"><td class="l">SINet ◇ (released)</td><td>0.872</td><td>0.946</td><td>0.806</td><td>0.034</td><td style="font-weight:400">0.745</td><td>0.829</td><td>0.644</td><td>0.092</td><td>0.776</td><td>0.864</td><td>0.631</td><td>0.043</td></tr>
+</table></div>
+<p>Per-sub-class \(S_\alpha\) for all 69 COD10K categories is reported in the repository [1] (<a href="assets/img/subclassresults.png" target="_blank">part 1</a>, <a href="assets/img/subclassresults-1.png" target="_blank">part 2</a>).</p>
+
+<h3 id="s-qual">5.2 Qualitative Results</h3>
+<figure><img src="assets/img/cmpresults.jpg" alt="Qualitative comparison of SINet, EGNet and PFANet" loading="lazy">
+<figcaption><b>Figure 7.</b> SINet vs. EGNet and PFANet on three hard COD10K cases [1]. <b>Indefinable boundary</b> (fish): SINet follows the true outline (\(S_\alpha\)=0.877), while the others leak into coral. <b>Occlusion</b> (owl behind trunk): SINet keeps the two separated visible parts apart. <b>Small, thin object</b> (pipefish): SINet recovers the full curved body, while PFANet floods the background.</figcaption></figure>
+
+<h3 id="s-ours">5.3 Our Reproduction (pretrained SINet, COD10K-test)</h3>
+<p>This subsection shows our own run of the released SINet_40 weights with <code>test_images.py</code> (Colab notebook, Step 2) on COD10K-test. The table and panels are loaded directly from <code>results/our_metrics.json</code> and <code>results/panel_*.png</code>, so they always match the committed outputs.</p>
+<div id="ours-metrics"><div class="pending">Our metrics appear here once <code>results/our_metrics.json</code> is committed (run the Colab notebook, Step 2).</div></div>
+<div id="ours-panels"></div>
+
+<h3 id="s-videores">5.4 Video Results (our extension)</h3>
+<p>Each panel shows <i>original frame | temporally smoothed heat-map \(S_t\) | overlay with mask, bounding box and centroid</i>. The plot shows detected area and centroid displacement over time.</p>
+<div id="video-panels"></div>
+<div id="video-pending" class="pending" style="display:none">Video frames appear here once <code>results/video_frame_*.png</code> and <code>results/video_track_plot.png</code> are committed (Colab notebook, Step 3).</div>
+
+<h3 id="s-discuss">5.5 Discussion and Observations</h3>
+<ol>
+<li><b>Two-stage search beats one-shot decoding.</b> The closest baselines, CPD and EGNet, also fuse multi-level features, yet SINet improves \(F^w_\beta\) by about 4 points (0.551 vs. 0.509). The difference is that SINet <em>re-extracts</em> deep features after attention, with separate layer3/layer4 weights, instead of only re-weighting decoder outputs.</li>
+<li><b>Generic detectors struggle on COD.</b> HTC and Mask R-CNN, both strong on COCO, score lowest in \(S_\alpha\) (0.548, 0.613). Instance proposals depend on objectness cues that camouflage removes.</li>
+<li><b>CAMO is the hardest set for MAE</b> (0.092–0.100, vs. 0.034–0.051 elsewhere). CAMO objects are larger on average, so each missed region costs more pixels.</li>
+<li><b>Retraining matters.</b> The released ◇ model improves \(F^w_\beta\) on COD10K from 0.551 to 0.631 with the same architecture, through mixed precision and 40 epochs. Implementation details move results as much as some architectural changes do.</li>
+<li><b>Code vs. paper (our verification).</b>
+ <ul class="tight">
+ <li>The paper lists the Gaussian in SA as \(\sigma{=}32,\lambda{=}4\). The code builds <code>_get_kernel(31, 4)</code>, a <em>31×31</em> kernel spanning ±4σ, so σ ≈ 3.9 px on the 44×44 map. The paper appears to describe the kernel size and the number of standard deviations.</li>
+ <li>The paper defines Bconv as Conv+BN+ReLU, but <code>BasicConv2d.forward</code> applies only Conv+BN. Its <code>self.relu</code> is defined and never called. Non-linearity enters only at the end of each RF block and through the multiplications in the PDC.</li>
+ <li>The PDC product index in Eq. (4) was corrected by the authors after publication. We used the corrected form, which matches the code.</li>
+ </ul></li>
+<li><b>Video behaviour.</b> Single-frame COD has no notion of motion. Our EMA smoothing reduces frame-to-frame flicker at the cost of a short lag behind fast movement. That trade-off is set by \(\alpha\).</li>
+</ol>
+
+<h3 id="s-fail">5.6 Failure Cases</h3>
+<p>Our test script automatically saves the two images with the highest MAE as failure cases (<i>image | ground truth | SINet prediction</i>); they appear below.</p>
+<div id="fail-panels"></div>
+<div class="callout warn"><span class="t">Typical failure modes of SINet</span>
+<ul class="tight">
+<li><b>Multiple camouflaged objects:</b> SINet predicts an object-level map without separating instances, and fainter instances are often missed.</li>
+<li><b>Very small objects:</b> the decoder outputs at 44×44 (stride 8) and is upsampled ×8, so thin parts such as legs, antennae and tails get blurred or lost.</li>
+<li><b>Background distractors:</b> textures that resemble animals (bark, coral) can create false positives. The baselines in Fig. 7 show this strongly, and SINet is not immune.</li>
+<li><b>No temporal reasoning:</b> on video, a frame where the animal is perfectly still and matched can be missed entirely, even though neighbouring frames find it. EMA can bridge only short gaps. Motion cues, as in MoCA [3], would be needed for longer ones.</li>
+<li><b>Single-object tracker assumption:</b> our extension follows the largest component, so it can switch to a different object if two are present.</li>
+</ul></div>
+</section>
+
+<!-- ============================ 6. CONCLUSION ============================ -->
+<section id="sec-concl">
+<h2><span class="n">6.</span>Conclusion</h2>
+<h4>Summary</h4>
+<p>We studied Camouflaged Object Detection through SINet, which models a predator’s <em>search → identify</em> behaviour with RF blocks for multi-scale receptive fields, partial decoders for efficient multiplicative fusion, and Gaussian search attention that links the two stages. We extracted and explained the full workflow from the repository diagrams and code, verified the equations against the implementation (finding three differences between paper and code), modernised the inference code, and extended SINet to video with temporal EMA smoothing and centroid tracking. On COD10K, SINet outperforms all 12 baselines in every metric. The released model reaches \(S_\alpha\)=0.776 and \(\mathcal M\)=0.043.</p>
+<h4>Future Work</h4>
+<ul class="tight">
+<li><b>Motion-aware COD:</b> add optical flow or frame differencing as a second input, so that movement “breaks” camouflage (the MoCA / video COD direction).</li>
+<li><b>Learned temporal models:</b> replace the EMA with ConvLSTM or temporal attention over several frames.</li>
+<li><b>Multi-object tracking:</b> associate several components over time, for example with a Kalman filter and Hungarian matching.</li>
+<li><b>Instance-level COD</b> and stronger backbones (Res2Net, Transformers), as explored in SINet-V2 [2].</li>
+<li><b>Edge deployment:</b> a lightweight backbone for real-time robot or drone perception.</li>
+</ul>
+</section>
+
+<!-- ============================ 7. REFERENCES ============================ -->
+<section id="sec-refs">
+<h2><span class="n">7.</span>References</h2>
+<ol class="refs">
+<li>D.-P. Fan, G.-P. Ji, G. Sun, M.-M. Cheng, J. Shen, L. Shao. “Camouflaged Object Detection.” <i>CVPR</i>, 2020. Code: <a href="https://github.com/DengPingFan/SINet" target="_blank">github.com/DengPingFan/SINet</a> · <a href="https://openaccess.thecvf.com/content_CVPR_2020/papers/Fan_Camouflaged_Object_Detection_CVPR_2020_paper.pdf" target="_blank">Paper</a></li>
+<li>D.-P. Fan, G.-P. Ji, M.-M. Cheng, L. Shao. “Concealed Object Detection.” <i>IEEE TPAMI</i>, 2022 (SINet-V2). <a href="https://github.com/GewelsJI/SINet-V2" target="_blank">GitHub</a></li>
+<li>H. Lamdouar, C. Yang, W. Xie, A. Zisserman. “Betrayed by Motion: Camouflaged Object Discovery via Motion Segmentation.” <i>ACCV</i>, 2020 (MoCA dataset).</li>
+<li>T.-Y. Lin et al. “Feature Pyramid Networks for Object Detection.” <i>CVPR</i>, 2017.</li>
+<li>K. He, G. Gkioxari, P. Dollár, R. Girshick. “Mask R-CNN.” <i>ICCV</i>, 2017.</li>
+<li>H. Zhao et al. “Pyramid Scene Parsing Network.” <i>CVPR</i>, 2017.</li>
+<li>N. Liu, J. Han, M.-H. Yang. “PiCANet: Learning Pixel-wise Contextual Attention for Saliency Detection.” <i>CVPR</i>, 2018.</li>
+<li>X. Qin et al. “BASNet: Boundary-Aware Salient Object Detection.” <i>CVPR</i>, 2019.</li>
+<li>Z. Wu, L. Su, Q. Huang. “Cascaded Partial Decoder for Fast and Accurate Salient Object Detection.” <i>CVPR</i>, 2019.</li>
+<li>J.-X. Zhao et al. “EGNet: Edge Guidance Network for Salient Object Detection.” <i>ICCV</i>, 2019.</li>
+<li>M. Stevens, S. Merilaita. “Animal Camouflage: Current Issues and New Perspectives.” <i>Phil. Trans. R. Soc. B</i>, 2009.</li>
+<li>P. Skurowski et al. “Animal Camouflage Analysis: CHAMELEON Database.” Unpublished manuscript, 2018.</li>
+<li>T.-N. Le, T. V. Nguyen, Z. Nie, M.-T. Tran, A. Sugimoto. “Anabranch Network for Camouflaged Object Segmentation.” <i>CVIU</i>, 2019 (CAMO).</li>
+<li>K. He, X. Zhang, S. Ren, J. Sun. “Deep Residual Learning for Image Recognition.” <i>CVPR</i>, 2016.</li>
+<li>S. Liu, D. Huang, Y. Wang. “Receptive Field Block Net for Accurate and Fast Object Detection.” <i>ECCV</i>, 2018.</li>
+<li>D.-P. Fan et al. “Structure-measure: A New Way to Evaluate Foreground Maps.” <i>ICCV</i>, 2017; “Enhanced-alignment Measure for Binary Foreground Map Evaluation.” <i>IJCAI</i>, 2018; R. Margolin et al. “How to Evaluate Foreground Maps?” <i>CVPR</i>, 2014.</li>
+</ol>
+<p style="font-size:14px;color:var(--muted)">All figures marked [1] and the original code in <code>code/Src</code> belong to the SINet authors and are reused for academic purposes under the repository’s license. Our additions are <code>test_images.py</code>, <code>video_inference.py</code>, the Colab notebook, the workflow diagram (Fig. 4), and this report.</p>
+</section>
+
+<!-- ============================ 8. PPT ============================ -->
+<section id="sec-ppt">
+<h2><span class="n">8.</span>Link to PPT File (on GitHub)</h2>
+<p>The presentation is in this repository at <code>assets/ppt/SINet_COD_Presentation.pptx</code>.</p>
+<div class="btns"><a class="btn primary" id="btn-ppt2" href="#">Open PPT on GitHub</a></div>
+</section>
+
+<!-- ============================ 9. VIDEO ============================ -->
+<section id="sec-video">
+<h2><span class="n">9.</span>Video Demonstration &amp; Screen Recording of PPT</h2>
+<h4>Video demonstration</h4>
+<div id="demo-slot"></div>
+<h4 style="margin-top:22px">Screen recording of the PPT</h4>
+<div id="pptrec-slot"></div>
+</section>
+
+</main>
+</div>
+<footer>EE5340 Video Analytics · IIT Guwahati · Akash Shukla, Abdul Quadir, Sanjeev Singh · 2026</footer>
+
+<script>
+(function(){
+  var C = window.CONFIG;
+  function setLink(id, url){ var a=document.getElementById(id); if(!a) return; if(url){a.href=url;a.target="_blank";a.rel="noopener";} else {a.classList.add('disabled');} }
+  setLink('btn-repo', C.repoURL); setLink('btn-ppt', C.pptURL); setLink('btn-ppt2', C.pptURL); setLink('btn-colab', C.colabURL);
+
+  function embed(url){
+    if(!url) return null;
+    var m = url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
+    if(m) return 'https://www.youtube.com/embed/' + m[1];
+    var d = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+    if(d) return 'https://drive.google.com/file/d/' + d[1] + '/preview';
+    return null;
+  }
+  function fillVideo(slotId, url, label){
+    var slot = document.getElementById(slotId), e = embed(url);
+    if(e){ slot.innerHTML = '<div class="video-embed"><iframe src="'+e+'" allowfullscreen loading="lazy" title="'+label+'"></iframe></div><p><a href="'+url+'" target="_blank" rel="noopener">Open '+label+' in a new tab ↗</a></p>'; }
+    else if(url){ slot.innerHTML = '<p><a class="btn primary" href="'+url+'" target="_blank" rel="noopener">Watch '+label+' ↗</a></p>'; }
+    else { slot.innerHTML = '<div class="pending">'+label+' link to be added (set it in the CONFIG block at the top of index.html).</div>'; }
+  }
+  fillVideo('demo-slot', C.demoVideoURL, 'video demonstration');
+  fillVideo('pptrec-slot', C.pptRecordingURL, 'PPT screen recording');
+  if(C.demoVideoURL){ var b=document.getElementById('btn-video'); b.href=C.demoVideoURL; b.target='_blank'; }
+
+  /* bar chart (pure SVG) */
+  var data=[["FPN",.697,.411],["MaskRCNN",.613,.402],["PSPNet",.678,.377],["UNet++",.623,.350],["PiCANet",.649,.322],["MSRCNN",.641,.419],["BASNet",.634,.365],["PFANet",.636,.286],["HTC",.548,.221],["CPD",.747,.508],["EGNet",.737,.509],["SINet",.771,.551]];
+  var svg=document.getElementById('chart1'), NS='http://www.w3.org/2000/svg';
+  function el(n,a,t){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;svg.appendChild(e);return e;}
+  function panel(x0, title, idx){
+    var d=data.slice().sort(function(a,b){return a[idx]-b[idx]}), w=440, h=250, y0=40, bw=w/d.length;
+    var max = idx==1?0.8:0.6;
+    el('text',{x:x0+w/2,y:22,'text-anchor':'middle','font-size':15,'font-weight':700,fill:'#1d2433'},title);
+    for(var g=0; g<=4; g++){ var v=max*g/4, y=y0+h-h*v/max; el('line',{x1:x0,x2:x0+w,y1:y,y2:y,stroke:'#e5e7eb'}); el('text',{x:x0-6,y:y+4,'text-anchor':'end','font-size':11,fill:'#64748b'},v.toFixed(2)); }
+    d.forEach(function(r,i){ var v=r[idx], bh=h*v/max, x=x0+i*bw+4, y=y0+h-bh;
+      el('rect',{x:x,y:y,width:bw-8,height:bh,rx:3,fill:r[0]=="SINet"?"#0f766e":"#94a3b8"});
+      el('text',{x:x+(bw-8)/2,y:y-4,'text-anchor':'middle','font-size':10,fill:'#334155'},v.toFixed(3));
+      el('text',{x:x+(bw-8)/2,y:y0+h+12,'text-anchor':'end','font-size':10.5,fill:'#475569',transform:'rotate(-40 '+(x+(bw-8)/2)+' '+(y0+h+12)+')'},r[0]);
+    });
+  }
+  panel(50,'Sα on COD10K-test (↑)',1); panel(550,'Fᵝᵦ (weighted) on COD10K-test (↑)',2);
+
+  /* our results: auto-load if present */
+  function addImg(container, src, cap){
+    var f=document.createElement('figure'); var i=new Image(); i.loading='lazy'; i.alt=cap;
+    i.onload=function(){ f.appendChild(i); var c=document.createElement('figcaption'); c.innerHTML=cap; f.appendChild(c); container.appendChild(f); };
+    i.src=src; return i;
+  }
+  var op=document.getElementById('ours-panels');
+  for(var k=1;k<=4;k++) addImg(op,'results/panel_'+k+'.png','<b>Our result '+k+'.</b> Image | ground truth | SINet prediction | overlay (threshold 0.5).');
+  var fp=document.getElementById('fail-panels');
+  for(var k=1;k<=2;k++) addImg(fp,'results/failure_'+k+'.png','<b>Failure case '+k+'.</b> Image | ground truth | prediction (from the highest-MAE images in our run).');
+  var vp=document.getElementById('video-panels'), seen=0, tried=0;
+  function vdone(ok){ tried++; if(ok) seen++; if(tried==4 && !seen) document.getElementById('video-pending').style.display='block'; }
+  for(var k=1;k<=3;k++){ var im=addImg(vp,'results/video_frame_'+k+'.png','<b>Video frame sample '+k+'.</b> Frame | smoothed heat-map S<sub>t</sub> | overlay with box and centroid.'); im.addEventListener('load',function(){vdone(true)}); im.addEventListener('error',function(){vdone(false)}); }
+  var pl=addImg(vp,'results/video_track_plot.png','<b>Track statistics.</b> Detected area and centroid displacement per frame.'); pl.addEventListener('load',function(){vdone(true)}); pl.addEventListener('error',function(){vdone(false)});
+
+  fetch('results/our_metrics.json').then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(m){
+    var h='<div class="tablewrap"><table><tr><th>Dataset</th><th># images</th><th>MAE ↓</th><th>IoU@0.5 ↑</th><th>F<sub>β</sub>@0.5 ↑</th><th>s / image</th><th>Device</th></tr>'+
+      '<tr><td>'+m.dataset+'</td><td>'+m.num_images+'</td><td>'+m.MAE+'</td><td>'+m['IoU@0.5']+'</td><td>'+m['F_beta@0.5']+'</td><td>'+m.sec_per_image+'</td><td>'+m.device+'</td></tr></table></div>'+
+      '<p>Our MAE can be compared with the official value (0.043 for the released model on all of COD10K-test). Small differences are expected if we evaluated a subset, and because of resizing and interpolation choices.</p>';
+    document.getElementById('ours-metrics').innerHTML=h;
+  }).catch(function(){});
+
+  /* active TOC */
+  var links=[].slice.call(document.querySelectorAll('#toc a')), targets=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  window.addEventListener('scroll',function(){ var y=window.scrollY+120, cur=0; targets.forEach(function(t,i){ if(t && t.offsetTop<=y) cur=i; }); links.forEach(function(a,i){a.classList.toggle('active',i==cur)}); },{passive:true});
+})();
+</script>
+</body>
+</html>
