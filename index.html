@@ -28,14 +28,6 @@ window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]
 html{scroll-behavior:smooth}
 body{margin:0;font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.65;font-size:16.5px}
 a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
-header.hero{background:radial-gradient(1200px 400px at 80% -10%,#134e4a 0%,transparent 60%),linear-gradient(135deg,#0b1220,#111a2e);color:#e8edf6;padding:56px 24px 40px}
-.hero .wrap{max-width:1180px;margin:0 auto}
-.tag{display:inline-block;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:#7dd3c7;border:1px solid #2b5f59;padding:3px 10px;border-radius:999px}
-.hero h1{font-size:clamp(28px,4vw,44px);line-height:1.15;margin:14px 0 8px;font-weight:700}
-.hero .sub{color:#b7c2d6;font-size:18px;margin:0 0 22px}
-.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px 28px;margin:18px 0 24px;font-size:15px}
-.meta b{color:#fff;display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#7dd3c7;margin-bottom:2px}
-.meta span{color:#dbe3f0}
 .btns{display:flex;flex-wrap:wrap;gap:10px}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;background:#1b2a44;color:#e8edf6;border:1px solid #2c3d5e;font-weight:600;font-size:14.5px}
 .btn:hover{background:#22365a;text-decoration:none}
@@ -91,30 +83,276 @@ footer{text-align:center;color:var(--muted);font-size:13.5px;padding:24px}
 .svgfig svg{max-width:100%;height:auto}
 @media (max-width:900px){.layout{grid-template-columns:1fr}nav.toc{display:none}.grid2,.grid3{grid-template-columns:1fr}main section{padding:22px 18px}}
 @media print{nav.toc,.btns{display:none}.layout{display:block}main section{break-inside:avoid-page;border:none}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+header.hunt{position:relative;height:100vh;min-height:560px;max-height:980px;overflow:hidden;background:#2f3a26;color:#ecfeff;cursor:crosshair;touch-action:pan-y}
+#hunt-canvas{position:absolute;inset:0;display:block}
+.hud{position:absolute;font-family:"Consolas","Courier New",monospace;font-size:12.5px;letter-spacing:.06em;color:#ecfeff;background:rgba(6,14,12,.55);border:1px solid rgba(236,254,255,.18);padding:8px 12px;border-radius:6px;backdrop-filter:blur(3px);pointer-events:none}
+.hud b{color:#5eead4;font-weight:600}
+.hud-tl{top:18px;left:18px;display:flex;align-items:center;gap:9px}
+.hud-dot{width:8px;height:8px;border-radius:50%;background:#f43f5e;box-shadow:0 0 0 0 rgba(244,63,94,.7);animation:rec 1.6s infinite}
+@keyframes rec{0%{box-shadow:0 0 0 0 rgba(244,63,94,.6)}70%{box-shadow:0 0 0 9px rgba(244,63,94,0)}100%{box-shadow:0 0 0 0 rgba(244,63,94,0)}}
+.hud-tr{top:18px;right:18px;text-align:right;line-height:1.7}
+.hud-bl{left:18px;bottom:18px;font-family:inherit}
+.hud-eq{font-size:15px}
+.hud-sub{font-size:11.5px;opacity:.75;margin-top:2px}
+.hunt-cta{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);text-align:center;width:min(620px,92vw)}
+.hunt-prompt{margin:0 0 12px;font-size:16px;font-weight:600;text-shadow:0 1px 8px rgba(0,0,0,.8)}
+.hunt-prompt span{display:block;font-weight:400;opacity:.85;font-size:14.5px}
+.hunt-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hunt-btn{font:600 14.5px/1 "Segoe UI",Roboto,Arial,sans-serif;padding:11px 18px;border-radius:999px;border:1px solid #5eead4;background:#0f766e;color:#ecfeff;cursor:pointer;text-decoration:none}
+.hunt-btn:hover{background:#115e59;text-decoration:none}
+.hunt-btn.ghost{background:rgba(6,14,12,.55);border-color:rgba(236,254,255,.35)}
+.hunt-btn[aria-pressed="true"]{background:#ecfeff;color:#0f766e}
+.specimen-wrap{background:#1c2419;padding:34px 24px 40px}
+.specimen{max-width:1020px;margin:0 auto;background:#f6f1e3;color:#2b2a22;border-radius:4px;padding:26px 32px 24px;box-shadow:0 18px 40px rgba(0,0,0,.35);position:relative;
+  background-image:repeating-linear-gradient(0deg,transparent 0 27px,rgba(43,42,34,.06) 27px 28px)}
+.specimen:before{content:"";position:absolute;top:14px;right:18px;width:14px;height:14px;border-radius:50%;background:#1c2419;box-shadow:inset 0 0 0 3px #cfc6ad}
+.specimen-head{display:flex;justify-content:space-between;font-family:"Courier New",monospace;font-size:12px;letter-spacing:.14em;color:#7a6f52;border-bottom:2px solid #2b2a22;padding-bottom:8px;margin-right:30px}
+.specimen-title{font-family:Cambria,Georgia,"Times New Roman",serif;font-size:clamp(24px,3.2vw,34px);font-weight:700;line-height:1.2;margin:14px 0 14px}
+.specimen-grid{display:grid;grid-template-columns:170px 1fr;gap:8px 18px;margin:0 0 18px;font-size:15.5px}
+.specimen-grid dt{font-family:"Courier New",monospace;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:#7a6f52;padding-top:3px}
+.specimen-grid dd{margin:0}
+.specimen-grid i{font-style:normal;font-family:"Courier New",monospace;font-size:13px;color:#7a6f52;margin-left:6px}
+.specimen-tags{display:flex;flex-wrap:wrap;gap:9px;border-top:1px dashed #b3a888;padding-top:16px}
+.tagchip{font-family:"Courier New",monospace;font-size:13px;letter-spacing:.04em;padding:8px 13px;border:1.5px solid #2b2a22;border-radius:3px;color:#2b2a22;background:transparent}
+.tagchip:hover{background:#2b2a22;color:#f6f1e3;text-decoration:none}
+.tagchip.solid{background:#0f766e;border-color:#0f766e;color:#ecfeff}
+.tagchip.disabled{opacity:.45;pointer-events:none}
+@media (max-width:700px){.hud-tr{display:none}.hud-bl{display:none}.specimen{padding:22px 18px}.specimen-grid{grid-template-columns:1fr;gap:2px}.specimen-grid dd{margin-bottom:10px}}
 </style>
 </head>
 <body>
 
-<header class="hero">
-  <div class="wrap">
-    <span class="tag">EE5340 · Video Analytics · Course Project 2026</span>
-    <h1>Camouflaged Object Detection in Images &amp; Video using SINet</h1>
-    <p class="sub">A Search-and-Identification network that finds objects hidden in their surroundings, plus a frame-by-frame video pipeline with temporal smoothing and centroid tracking.</p>
-    <div class="meta">
-      <div><b>Team</b><span>Akash Shukla (264152017)<br>Abdul Quadir (264152001)<br>Sanjeev Singh (264152013)</span></div>
-      <div><b>Course &amp; Faculty</b><span>EE5340 Video Analytics<br>Prof. Prithwijit Guha</span></div>
-      <div><b>Department</b><span>SiSAS, Indian Institute of Technology Guwahati</span></div>
-      <div><b>Base work</b><span>Fan et al., “Camouflaged Object Detection”, CVPR 2020 (Oral) [1]</span></div>
-    </div>
-    <div class="btns">
-      <a class="btn primary" id="btn-repo" href="#">GitHub Repository</a>
-      <a class="btn" id="btn-ppt" href="#">Presentation (PPT)</a>
-      <a class="btn" id="btn-video" href="#sec-video">Video Demonstration</a>
-      <a class="btn" id="btn-colab" href="#">Run in Colab</a>
-      <a class="btn" href="#sec-setup">Setup Guide</a>
+<header class="hunt" id="hunt" aria-labelledby="hunt-title">
+  <h1 id="hunt-title" class="sr-only">Camouflaged Object Detection in Images &amp; Video using SINet</h1>
+  <canvas id="hunt-canvas" aria-hidden="true"></canvas>
+
+  <div class="hud hud-tl">
+    <span class="hud-dot"></span>EE5340 · VIDEO ANALYTICS · IIT GUWAHATI
+  </div>
+  <div class="hud hud-tr" aria-hidden="true">
+    <div>frame&nbsp;<b id="hud-t">0000</b></div>
+    <div>centroid&nbsp;<b id="hud-c">(—, —)</b></div>
+    <div>object&nbsp;in&nbsp;view&nbsp;<b id="hud-o">0%</b></div>
+  </div>
+  <div class="hud hud-bl" aria-hidden="true">
+    <div class="hud-eq">\(S_t=\alpha\,C_t+(1-\alpha)\,S_{t-1}\)</div>
+    <div class="hud-sub">spotlight = Gaussian search attention, \(\alpha=0.15\)</div>
+  </div>
+
+  <div class="hunt-cta">
+    <p class="hunt-prompt" id="hunt-prompt">Something is hiding in this texture. <span>Move your cursor (or finger) to search for it.</span></p>
+    <div class="hunt-actions">
+      <button type="button" class="hunt-btn" id="hunt-reveal" aria-pressed="false">Reveal \(C_i\)</button>
+      <a class="hunt-btn ghost" href="#specimen">Read the report ↓</a>
     </div>
   </div>
 </header>
+
+<section class="specimen-wrap" id="specimen" aria-label="Project details">
+  <div class="specimen">
+    <div class="specimen-head">
+      <span>FIELD SPECIMEN Nº 5340</span>
+      <span>CATALOGUED 2026</span>
+    </div>
+    <div class="specimen-title">Camouflaged Object Detection in Images &amp; Video using SINet</div>
+    <dl class="specimen-grid">
+      <dt>Behaviour</dt><dd>Searches first (Search Module), then identifies (Identification Module), linked by Gaussian search attention. Extended by us to video with temporal EMA smoothing and centroid tracking.</dd>
+      <dt>Habitat</dt><dd>COD10K · CAMO · CHAMELEON</dd>
+      <dt>Collected by</dt><dd>Akash Shukla <i>264152017</i><br>Abdul Quadir <i>264152001</i><br>Sanjeev Singh <i>264152013</i></dd>
+      <dt>Curator</dt><dd>Prof. Prithwijit Guha · EE5340 Video Analytics</dd>
+      <dt>Institution</dt><dd>SiSAS, Indian Institute of Technology Guwahati</dd>
+      <dt>First described</dt><dd>Fan et al., “Camouflaged Object Detection”, CVPR 2020 (Oral) [1]</dd>
+    </dl>
+    <div class="specimen-tags">
+      <a class="tagchip solid" id="btn-repo" href="#">GitHub repository</a>
+      <a class="tagchip" id="btn-ppt" href="#">Presentation (PPT)</a>
+      <a class="tagchip" id="btn-video" href="#sec-video">Video demonstration</a>
+      <a class="tagchip" id="btn-colab" href="#">Run in Colab</a>
+      <a class="tagchip" href="#sec-setup">Setup guide</a>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ======================================================================
+   THE HUNT: the page title is camouflaged inside a generated texture.
+   A Gaussian "search attention" spotlight follows the pointer with the same
+   EMA we use in our video extension, and reveals the hidden object as a teal
+   segmentation mask. Plain canvas + JS, no libraries.
+   ====================================================================== */
+(function(){
+  var hero = document.getElementById('hunt'), cv = document.getElementById('hunt-canvas');
+  if(!cv || !cv.getContext) return;
+  var ctx = cv.getContext('2d');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0, scene, overlay, maskData, maskW, maskH;
+  var palette = ['#3f4a2c','#5b6236','#7a7445','#8f8556','#4d3f2a','#6b5638','#2f3a26','#a39466','#56663d'];
+
+  // seeded RNG so the texture differs per visit but is consistent within one
+  var seed = (Date.now() % 100000) + 7;
+  function rng(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+
+  function blob(c, x, y, r){
+    var n = 7 + Math.floor(rng()*5), pts = [];
+    for(var i=0;i<n;i++){ var a=i/n*Math.PI*2, rr=r*(0.55+rng()*0.75); pts.push([x+Math.cos(a)*rr*1.35, y+Math.sin(a)*rr]); }
+    c.beginPath();
+    for(var j=0;j<n;j++){
+      var p=pts[j], q=pts[(j+1)%n], mx=(p[0]+q[0])/2, my=(p[1]+q[1])/2;
+      if(j===0) c.moveTo(mx,my); else c.quadraticCurveTo(p[0],p[1],mx,my);
+    }
+    var p0=pts[0], q0=pts[1]; c.quadraticCurveTo(p0[0],p0[1],(p0[0]+q0[0])/2,(p0[1]+q0[1])/2);
+    c.fill();
+  }
+  function camo(w, h, scale){
+    var c = document.createElement('canvas'); c.width=w; c.height=h; var g=c.getContext('2d');
+    g.fillStyle = palette[0]; g.fillRect(0,0,w,h);
+    var layers = [[1.0,0.9],[0.65,0.85],[0.4,0.9],[0.22,1.0]];
+    for(var L=0; L<layers.length; L++){
+      var r = Math.max(w,h)*0.06*layers[L][0]*scale, count = Math.ceil(w*h/(r*r)*0.55);
+      g.globalAlpha = layers[L][1];
+      for(var k=0;k<count;k++){ g.fillStyle = palette[Math.floor(rng()*palette.length)]; blob(g, rng()*w, rng()*h, r*(0.6+rng()*0.8)); }
+      if('filter' in g && L < 2){ var t=document.createElement('canvas'); t.width=w; t.height=h; var tg=t.getContext('2d'); tg.filter='blur('+(1.5*DPR)+'px)'; tg.drawImage(c,0,0); g.globalAlpha=1; g.clearRect(0,0,w,h); g.drawImage(t,0,0); }
+    }
+    g.globalAlpha = 1;
+    // fine grain
+    var img = g.getImageData(0,0,w,h), d = img.data;
+    for(var i=0;i<d.length;i+=4){ var n=(rng()-0.5)*18; d[i]+=n; d[i+1]+=n; d[i+2]+=n; }
+    g.putImageData(img,0,0);
+    return c;
+  }
+  function titleMask(w, h){
+    var c = document.createElement('canvas'); c.width=w; c.height=h; var g=c.getContext('2d');
+    var lines = (w/DPR < 640) ? ['CAMOUFLAGED','OBJECT','DETECTION'] : ['CAMOUFLAGED','OBJECT DETECTION'];
+    var family = '"Arial Black","Segoe UI Black","Helvetica Neue",Arial,sans-serif';
+    var size = 200*DPR; g.font = '900 '+size+'px '+family;
+    var widest = Math.max.apply(null, lines.map(function(l){ return g.measureText(l).width; }));
+    size = Math.min(size * (w*0.86)/widest, h*0.62/(lines.length*1.02));
+    g.font = '900 '+size+'px '+family; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#fff';
+    var lh = size*1.0, top = h*0.47 - lh*(lines.length-1)/2;
+    lines.forEach(function(l,i){ g.fillText(l, w/2, top+i*lh); });
+    var small = Math.max(13*DPR, size*0.2);
+    g.font = '700 '+small+'px '+family;
+    g.fillText('in Images & Video using SINet', w/2, top+(lines.length-1)*lh + lh*0.5 + small*1.1);
+    return c;
+  }
+
+  function build(){
+    var rect = hero.getBoundingClientRect();
+    W = Math.round(rect.width*DPR); H = Math.round(rect.height*DPR);
+    cv.width = W; cv.height = H; cv.style.width = '100%'; cv.style.height = '100%';
+    var bg = camo(W, H, 1.0), fg = camo(W, H, 0.55), mask = titleMask(W, H);
+
+    // scene = background + title made of a *different* camouflage texture (the hidden object)
+    scene = document.createElement('canvas'); scene.width=W; scene.height=H; var s=scene.getContext('2d');
+    s.drawImage(bg,0,0);
+    var obj = document.createElement('canvas'); obj.width=W; obj.height=H; var o=obj.getContext('2d');
+    o.drawImage(fg,0,0); o.globalCompositeOperation='destination-in'; o.drawImage(mask,0,0);
+    s.globalAlpha = 0.92; s.drawImage(obj,0,0); s.globalAlpha = 1;
+    // gentle vignette so the HUD stays readable
+    var vg = s.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.75);
+    vg.addColorStop(0,'rgba(8,14,12,0)'); vg.addColorStop(1,'rgba(8,14,12,0.55)');
+    s.fillStyle=vg; s.fillRect(0,0,W,H);
+
+    // overlay = what SINet "sees": teal mask + crisp contour (the identification map C_i)
+    overlay = document.createElement('canvas'); overlay.width=W; overlay.height=H; var v=overlay.getContext('2d');
+    v.drawImage(mask,0,0); v.globalCompositeOperation='source-in'; v.fillStyle='rgba(20,184,166,0.62)'; v.fillRect(0,0,W,H);
+    v.globalCompositeOperation='source-over';
+    var edge = document.createElement('canvas'); edge.width=W; edge.height=H; var e=edge.getContext('2d');
+    var off = Math.max(1, Math.round(1.6*DPR));
+    [[off,0],[-off,0],[0,off],[0,-off]].forEach(function(d){ e.drawImage(mask,d[0],d[1]); });
+    e.globalCompositeOperation='destination-out'; e.drawImage(mask,0,0);
+    e.globalCompositeOperation='source-in'; e.fillStyle='#ecfeff'; e.fillRect(0,0,W,H);
+    v.drawImage(edge,0,0);
+
+    // low-res copy of the mask for the "object in view" estimate
+    maskW = 160; maskH = Math.max(1, Math.round(160*H/W));
+    var m = document.createElement('canvas'); m.width=maskW; m.height=maskH; var mg=m.getContext('2d');
+    mg.drawImage(mask,0,0,maskW,maskH); maskData = mg.getImageData(0,0,maskW,maskH).data;
+  }
+
+  // ---- state: target C_t (pointer) and smoothed S_t (spotlight), exactly our EMA ----
+  var alpha = 0.15, target = null, S = null, lastMove = -1e9, t = 0, reveal = 0, revealGoal = 0, found = false;
+  function radius(){ return Math.min(W,H)*0.2 + reveal*Math.max(W,H); }
+  function pointer(ev){
+    var r = cv.getBoundingClientRect(), p = ev.touches ? ev.touches[0] : ev;
+    target = [(p.clientX - r.left)*DPR, (p.clientY - r.top)*DPR]; lastMove = performance.now();
+  }
+  hero.addEventListener('mousemove', pointer);
+  hero.addEventListener('touchmove', pointer, {passive:true});
+  hero.addEventListener('touchstart', pointer, {passive:true});
+
+  var btn = document.getElementById('hunt-reveal');
+  btn.addEventListener('click', function(){
+    revealGoal = revealGoal ? 0 : 1; btn.setAttribute('aria-pressed', revealGoal ? 'true':'false');
+    btn.firstChild && (btn.dataset.state = revealGoal ? 'on' : 'off');
+  });
+
+  function objectInView(cx, cy, R){
+    // fraction of samples inside the spotlight that fall on the hidden object
+    var hit=0, tot=0, sx=W/maskW, sy=H/maskH, step=3;
+    for(var y=0;y<maskH;y+=step) for(var x=0;x<maskW;x+=step){
+      var dx=x*sx-cx, dy=y*sy-cy; if(dx*dx+dy*dy > R*R*0.36) continue;
+      tot++; if(maskData[(y*maskW+x)*4+3] > 128) hit++;
+    }
+    return tot ? hit/tot : 0;
+  }
+
+  var hudT = document.getElementById('hud-t'), hudC = document.getElementById('hud-c'), hudO = document.getElementById('hud-o'), prompt = document.getElementById('hunt-prompt');
+  function frame(now){
+    t++;
+    var idle = now - lastMove > 2600;
+    var C;
+    if(!target || idle){
+      // autonomous search: a slow Lissajous sweep over the hidden title
+      var k = now/1000; C = [W*(0.5+0.36*Math.sin(k*0.55)), H*(0.47+0.2*Math.sin(k*0.9+1.2))];
+    } else C = target;
+    S = S ? [alpha*C[0]+(1-alpha)*S[0], alpha*C[1]+(1-alpha)*S[1]] : C.slice();   // S_t = a C_t + (1-a) S_{t-1}
+    reveal += (revealGoal - reveal)*0.08;
+
+    ctx.clearRect(0,0,W,H);
+    ctx.drawImage(scene,0,0);
+    var R = radius();
+    // Gaussian-like spotlight: draw the C_i overlay masked by a radial falloff
+    ctx.save();
+    var g = ctx.createRadialGradient(S[0],S[1],0,S[0],S[1],R);
+    g.addColorStop(0,'rgba(0,0,0,1)'); g.addColorStop(0.45,'rgba(0,0,0,0.85)'); g.addColorStop(1,'rgba(0,0,0,0)');
+    var sp = frame.sp || (frame.sp = document.createElement('canvas'));
+    if(sp.width!==W || sp.height!==H){ sp.width=W; sp.height=H; }
+    var sg = sp.getContext('2d'); sg.clearRect(0,0,W,H); sg.globalCompositeOperation='source-over';
+    sg.drawImage(overlay,0,0); sg.globalCompositeOperation='destination-in'; sg.fillStyle=g; sg.fillRect(0,0,W,H);
+    ctx.drawImage(sp,0,0);
+    ctx.restore();
+    // search ring + centroid cross-hair
+    if(reveal < 0.95){
+      ctx.lineWidth = 1.2*DPR; ctx.strokeStyle='rgba(236,254,255,0.55)'; ctx.setLineDash([6*DPR,6*DPR]);
+      ctx.beginPath(); ctx.arc(S[0],S[1],R*0.62,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+      ctx.strokeStyle='rgba(236,254,255,0.9)'; var a=9*DPR;
+      ctx.beginPath(); ctx.moveTo(S[0]-a,S[1]); ctx.lineTo(S[0]+a,S[1]); ctx.moveTo(S[0],S[1]-a); ctx.lineTo(S[0],S[1]+a); ctx.stroke();
+    }
+    if(t % 3 === 0){
+      var o = reveal > 0.9 ? 1 : objectInView(S[0],S[1],R);
+      hudT.textContent = ('000'+(t%10000)).slice(-4);
+      hudC.textContent = '('+Math.round(S[0]/DPR)+', '+Math.round(S[1]/DPR)+')';
+      hudO.textContent = Math.round(o*100)+'%';
+      if(!found && o > 0.25 && target && !idle){ found = true; prompt.innerHTML = 'Found it. That is what SINet does: <span>search with attention, then identify the hidden object.</span>'; }
+    }
+    if(!reduce) requestAnimationFrame(frame);
+  }
+
+  var rt, lastSize = '';
+  function rebuildIfNeeded(){
+    var r = hero.getBoundingClientRect(), key = Math.round(r.width)+'x'+Math.round(r.height);
+    if(key === lastSize) return; lastSize = key; build(); if(reduce) frame(performance.now());
+  }
+  if(window.ResizeObserver) new ResizeObserver(function(){ clearTimeout(rt); rt = setTimeout(rebuildIfNeeded, 120); }).observe(hero);
+  else window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(rebuildIfNeeded, 150); });
+  rebuildIfNeeded();
+  if(reduce){ revealGoal = reveal = 1; btn.setAttribute('aria-pressed','true'); frame(performance.now()); }
+  else requestAnimationFrame(frame);
+})();
+</script>
 
 <div class="layout">
 <nav class="toc" id="toc">
