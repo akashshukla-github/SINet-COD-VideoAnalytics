@@ -90,7 +90,7 @@ SINet copies a predator: a **Search Module** finds *where* the prey might be, **
 
 ### 3.1 Overall workflow
 <p align="center"><img src="assets/img/workflow.png" width="100%" alt="SINet workflow typeset in LaTeX/TikZ"></p>
-<p align="center"><sub><b>Figure 2.</b> Workflow we extracted from the README figure and the code, typeset in LaTeX/TikZ (ours). Blue: backbone · grey: RF blocks · red: partial decoders · green: search attention · yellow: supervision · orange: our video extension.</sub></p>
+<p align="center"><sub><b>Figure 2.</b> Workflow we extracted from the README figure and the code, typeset in LaTeX/TikZ (ours). Olive: backbone · stone: RF blocks · rust: partial decoders · teal: search attention · ochre: supervision · terracotta: our video extension.</sub></p>
 
 <details>
 <summary><b>Original SINet architecture figure from the authors (click)</b></summary>
@@ -266,7 +266,7 @@ SINet's *search → identify* design (RF, PDC and Gaussian Search Attention) out
 ## 7. Repository Structure & How to Run
 ```
 ├── index.html                           # Project report webpage (self-contained: images + MathJax embedded)
-├── config.js                            # ← paste your YouTube/Drive video links here
+├── config.js                            # ← paste your two YouTube video links here
 ├── SINet_Complete_Code_Explained.ipynb  # ALL project code in one notebook, explained (runs on CPU)
 ├── SINet_Colab_Demo.ipynb               # One-click Colab: weights → image results → video results
 ├── assets/
